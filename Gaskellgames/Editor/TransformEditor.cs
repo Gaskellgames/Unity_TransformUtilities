@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEditor;
 
+/// <summary>
+/// Code created by Gaskellgames: https://github.com/Gaskellgames/Unity_TransformUtilities
+/// </summary>
+
 namespace Gaskellgames
 {
     [CustomEditor(typeof(Transform))] [CanEditMultipleObjects]
