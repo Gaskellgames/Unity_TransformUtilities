@@ -77,7 +77,7 @@ namespace Gaskellgames
             GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
             if(open) { label = "\u25cb Transform Utilities \u25cb "; } else { label = "\u25cf Transform Utilities \u25cf"; }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(new GUIContent(label, "Reset Scale to Vector3.one"), myStyle, GUILayout.Width(100), GUILayout.Height(myStyle.fontSize)))
+            if (GUILayout.Button(new GUIContent(label, "View global properties"), myStyle, GUILayout.Width(100), GUILayout.Height(myStyle.fontSize)))
             {
                 open = !open;
             }
