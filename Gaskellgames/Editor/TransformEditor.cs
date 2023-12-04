@@ -15,6 +15,7 @@ namespace Gaskellgames
         private static bool uniformScale;
         private static bool open;
         private static string label;
+        private static string icon = "⸦/⸧";
         
         #endregion
 
@@ -25,6 +26,9 @@ namespace Gaskellgames
         public override void OnInspectorGUI()
         {
             Transform transformTarget = (Transform)target;
+            float defaultLabelWidth = EditorGUIUtility.labelWidth;
+            Color defaultColor = GUI.backgroundColor;
+            GUIStyle myStyle = new GUIStyle();
             
             // position
             GUILayout.BeginHorizontal();
@@ -46,16 +50,28 @@ namespace Gaskellgames
 
             // scale
             GUILayout.BeginHorizontal();
+            EditorGUIUtility.labelWidth = defaultLabelWidth - 35;
+            EditorGUILayout.PrefixLabel("Scale");
+            myStyle.normal.textColor = new Color32(179, 179, 179, 255);
+            myStyle.alignment = TextAnchor.MiddleCenter;
+            GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
+            if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), myStyle, GUILayout.Width(35), GUILayout.Height(20)))
+            {
+                uniformScale = !uniformScale;
+            }
+            GUI.backgroundColor = defaultColor;
+            EditorGUIUtility.labelWidth = 0;
             ScaleGUI(transformTarget);
+            EditorGUIUtility.labelWidth = defaultLabelWidth;
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Scale to Vector3.one"), GUILayout.Width(20), GUILayout.Height(20)))
             {
                 transformTarget.localScale = Vector3.one;
             }
             GUILayout.EndHorizontal();
 
+            // utilities
+            EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
-            Color defaultColor = GUI.backgroundColor;
-            GUIStyle myStyle = new GUIStyle();
             myStyle.fontSize = 10;
             myStyle.normal.textColor = Color.grey;
             GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
@@ -68,24 +84,15 @@ namespace Gaskellgames
             GUI.backgroundColor = defaultColor;
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            
             if (open)
             {
                 GUILayout.BeginHorizontal("box");
                 GUILayout.BeginVertical();
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                GUI.backgroundColor = new Color32(179, 179, 179, 128);
-                if (GUILayout.Button(new GUIContent("Lock Scale Aspect Ratio", "Set scale uniformly"), GUILayout.Width(150), GUILayout.Height(20)))
-                {
-                    uniformScale = !uniformScale;
-                }
-                GUI.backgroundColor = defaultColor;
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
                 GUI.enabled = false;
-                EditorGUILayout.Space();
-                ScaleGUI(transformTarget, true);
                 EditorGUILayout.Space();
                 EditorGUILayout.Vector3Field("Global Position", transformTarget.position);
                 EditorGUILayout.Vector3Field("Global Rotation", transformTarget.eulerAngles);
@@ -96,28 +103,57 @@ namespace Gaskellgames
             }
         }
 
-        private void ScaleGUI(Transform transformTarget, bool invert = false)
+        #endregion
+
+        //----------------------------------------------------------------------------------------------------
+
+        #region Private Functions
+        
+        private void ScaleGUI(Transform transformTarget)
         {
-            bool value = uniformScale;
-            if (invert) { value = !value; }
-            
-            if (!value)
+            Undo.RecordObject(transformTarget, "transform scale updated");
+            if (uniformScale)
             {
-                transformTarget.localScale = EditorGUILayout.Vector3Field("Scale", transformTarget.localScale);
+                icon = "\u2E26\u2E27";
+                Vector3 originalScale = transformTarget.localScale;
+                Vector3 newScale = originalScale;
+                
+                EditorGUI.BeginChangeCheck();
+                transformTarget.localScale = EditorGUILayout.Vector3Field("", transformTarget.localScale);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    newScale.x = transformTarget.localScale.x;
+                    float differenceX = newScale.x / originalScale.x;
+                    
+                    newScale.y = transformTarget.localScale.y;
+                    float differenceY = newScale.y / originalScale.y;
+                    
+                    newScale.z = transformTarget.localScale.z;
+                    float differenceZ = newScale.z / originalScale.z;
+
+                    if (differenceX != 1)
+                    {
+                        newScale.y = MathUtility.RoundFloat(originalScale.y * differenceX, 2);
+                        newScale.z = MathUtility.RoundFloat(originalScale.z * differenceX, 2);
+                    }
+                    else if (differenceY != 1)
+                    {
+                        newScale.x = MathUtility.RoundFloat(originalScale.x * differenceY, 2);
+                        newScale.z = MathUtility.RoundFloat(originalScale.z * differenceY, 2);
+                    }
+                    else if (differenceZ != 1)
+                    {
+                        newScale.x = MathUtility.RoundFloat(originalScale.x * differenceZ, 2);
+                        newScale.y = MathUtility.RoundFloat(originalScale.y * differenceZ, 2);
+                    }
+                    
+                    transformTarget.localScale = newScale;
+                }
             }
             else
             {
-                Vector3 originalScale = transformTarget.localScale;
-                Vector3 newScale = originalScale;
-                EditorGUI.BeginChangeCheck();
-                newScale.x = EditorGUILayout.FloatField("Scale Ratio", newScale.x);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    float difference = newScale.x / originalScale.x;
-                    newScale.y = MathUtility.RoundFloat(originalScale.y * difference, 2);
-                    newScale.z = MathUtility.RoundFloat(originalScale.z * difference, 2);
-                }
-                transformTarget.localScale = newScale;
+                icon = "\u2E26/\u2E27";
+                transformTarget.localScale = EditorGUILayout.Vector3Field("", transformTarget.localScale);
             }
         }
 
