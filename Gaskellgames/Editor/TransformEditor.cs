@@ -15,20 +15,25 @@ namespace Gaskellgames
         private static bool uniformScale;
         private static bool open;
         private static string label;
-        private static string icon = "⸦/⸧";
+        private static string icon = "\u2E26\\\u2E27";
+        private GUIStyle buttonStyle1 = new GUIStyle();
+        private GUIStyle buttonStyle2 = new GUIStyle();
+        
+        private Color32 textColor = new Color32(179, 179, 179, 255);
+        private Color32 blankColor = new Color32(000, 000, 000, 000);
         
         #endregion
 
         //----------------------------------------------------------------------------------------------------
 
-        #region OnInspectorGUI
-
+        #region On Events
+        
         public override void OnInspectorGUI()
         {
             Transform transformTarget = (Transform)target;
             float defaultLabelWidth = EditorGUIUtility.labelWidth;
-            Color defaultColor = GUI.backgroundColor;
-            GUIStyle myStyle = new GUIStyle();
+            Color defaultBackground = GUI.backgroundColor;
+            CreateButtons();
             
             // position
             GUILayout.BeginHorizontal();
@@ -50,16 +55,14 @@ namespace Gaskellgames
 
             // scale
             GUILayout.BeginHorizontal();
-            EditorGUIUtility.labelWidth = defaultLabelWidth - 35;
+            EditorGUIUtility.labelWidth = defaultLabelWidth - 25;
             EditorGUILayout.PrefixLabel("Scale");
-            myStyle.normal.textColor = new Color32(179, 179, 179, 255);
-            myStyle.alignment = TextAnchor.MiddleCenter;
             GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
-            if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), myStyle, GUILayout.Width(35), GUILayout.Height(20)))
+            if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), buttonStyle1, GUILayout.Width(25), GUILayout.Height(20)))
             {
                 uniformScale = !uniformScale;
             }
-            GUI.backgroundColor = defaultColor;
+            GUI.backgroundColor = defaultBackground;
             EditorGUIUtility.labelWidth = 0;
             ScaleGUI(transformTarget);
             EditorGUIUtility.labelWidth = defaultLabelWidth;
@@ -72,16 +75,14 @@ namespace Gaskellgames
             // utilities
             EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
-            myStyle.fontSize = 10;
-            myStyle.normal.textColor = Color.grey;
             GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
             if(open) { label = "\u25cb Transform Utilities \u25cb "; } else { label = "\u25cf Transform Utilities \u25cf"; }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(new GUIContent(label, "View global properties"), myStyle, GUILayout.Width(100), GUILayout.Height(myStyle.fontSize)))
+            if (GUILayout.Button(new GUIContent(label, "View global properties"), buttonStyle2, GUILayout.Width(100), GUILayout.Height(buttonStyle2.fontSize)))
             {
                 open = !open;
             }
-            GUI.backgroundColor = defaultColor;
+            GUI.backgroundColor = defaultBackground;
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
             if (open)
@@ -101,6 +102,9 @@ namespace Gaskellgames
                 GUILayout.EndVertical();
                 GUILayout.EndHorizontal();
             }
+            
+            // force update window (to have snappy hover)
+            Repaint();
         }
 
         #endregion
@@ -108,6 +112,90 @@ namespace Gaskellgames
         //----------------------------------------------------------------------------------------------------
 
         #region Private Functions
+
+        private void CreateButtons()
+        {
+            Color32 hoverColor = new Color32(099, 099, 099, 255);
+            Color32 hoverBorderColor = new Color32(028, 028, 028, 255);
+            Color32 activeColor = new Color32(000, 128, 223, 255);
+            Color32 activeBorderColor = new Color32(010, 010, 010, 255);
+        
+            // button 1
+            buttonStyle1.fontSize = 9;
+            buttonStyle1.alignment = TextAnchor.MiddleCenter;
+            buttonStyle1.normal.textColor = textColor;
+            buttonStyle1.hover.textColor = textColor;
+            buttonStyle1.active.textColor = textColor;
+            buttonStyle1.normal.background = CreateTexture(20, 20, 1, true, blankColor, blankColor);
+            buttonStyle1.hover.background = CreateTexture(20, 20, 1, true, hoverColor, hoverBorderColor);
+            buttonStyle1.active.background = CreateTexture(20, 20, 1, true, activeColor, activeBorderColor);
+            
+            // button 2
+            buttonStyle2.fontSize = 10;
+            buttonStyle2.normal.textColor = Color.grey;
+        }
+        
+        private Texture2D CreateTexture(int width, int height, int border, bool isRounded, Color32 backgroundColor, Color32 borderColor)
+        {
+            Color[] pixels = new Color[width * height];
+            int pixelIndex = 0;
+
+            if (isRounded)
+            {
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        // if at corner add corner color
+                        if ((i < border || i >= width - border) && (j < border || j >= width - border))
+                        {
+                            pixels[pixelIndex] = blankColor;
+                        }
+                        // otherwise if on border... 
+                        else if ((i < border || i >= width - border || j < border || j >= width - border)
+                                 || ((i < border*2 || i >= width - border*2) && (j < border*2 || j >= width - border*2)))
+                        {
+                            // ... add border color
+                            pixels[pixelIndex] = borderColor;
+                        }
+                        else
+                        {
+                            // ... otherwise add background color
+                            pixels[pixelIndex] = backgroundColor;
+                        }
+
+                        pixelIndex++;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        // if on border... 
+                        if (i < border || i >= width - border || j < border || j >= width - border)
+                        {
+                            // ... add border color
+                            pixels[pixelIndex] = borderColor;
+                        }
+                        else
+                        {
+                            // ... otherwise add background color
+                            pixels[pixelIndex] = backgroundColor;
+                        }
+
+                        pixelIndex++;
+                    }
+                }
+            }
+   
+            Texture2D result = new Texture2D(width, height);
+            result.SetPixels(pixels);
+            result.Apply();
+            return result;
+        }
         
         private void ScaleGUI(Transform transformTarget)
         {
@@ -152,7 +240,7 @@ namespace Gaskellgames
             }
             else
             {
-                icon = "\u2E26/\u2E27";
+                icon = "\u2E26\\\u2E27";
                 transformTarget.localScale = EditorGUILayout.Vector3Field("", transformTarget.localScale);
             }
         }
