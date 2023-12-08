@@ -37,7 +37,7 @@ namespace Gaskellgames
             
             // position
             GUILayout.BeginHorizontal();
-            transformTarget.localPosition = EditorGUILayout.Vector3Field("Position", transformTarget.localPosition);
+            transformTarget.localPosition = EditorGUILayout.Vector3Field(new GUIContent("Position", "The local position of this GameObject relative to the parent"), transformTarget.localPosition);
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Position to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
             {
                 transformTarget.localPosition = Vector3.zero;
@@ -46,7 +46,7 @@ namespace Gaskellgames
 
             // rotation (eulerAngles)
             GUILayout.BeginHorizontal();
-            transformTarget.localEulerAngles = EditorGUILayout.Vector3Field("Rotation", transformTarget.localEulerAngles);
+            transformTarget.localEulerAngles = EditorGUILayout.Vector3Field(new GUIContent("Rotation", "The local rotation of this GameObject relative to the parent"), transformTarget.localEulerAngles);
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Rotation to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
             {
                 transformTarget.localEulerAngles = Vector3.zero;
@@ -56,7 +56,7 @@ namespace Gaskellgames
             // scale
             GUILayout.BeginHorizontal();
             EditorGUIUtility.labelWidth = defaultLabelWidth - 25;
-            EditorGUILayout.PrefixLabel("Scale");
+            EditorGUILayout.PrefixLabel(new GUIContent("Scale", "The local scaling of this GameObject relative to the parent"));
             GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
             if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), buttonStyle1, GUILayout.Width(25), GUILayout.Height(20)))
             {
