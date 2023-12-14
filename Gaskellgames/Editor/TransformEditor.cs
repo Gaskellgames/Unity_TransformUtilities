@@ -47,9 +47,9 @@ namespace Gaskellgames
             float defaultLabelWidth = EditorGUIUtility.labelWidth;
             Color defaultBackground = GUI.backgroundColor;
             CreateButtons();
-            
             serializedObject.Update();
             
+            // position
             GUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(new GUIContent("Position", "Local Position"));
             EditorGUILayout.PropertyField(m_LocalPosition, GUIContent.none);
@@ -59,6 +59,7 @@ namespace Gaskellgames
             }
             GUILayout.EndHorizontal();
             
+            // rotation
             GUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(new GUIContent("Rotation", "Local Rotation"));
             EditorGUILayout.PropertyField(m_LocalRotation, GUIContent.none);
@@ -68,17 +69,20 @@ namespace Gaskellgames
             }
             GUILayout.EndHorizontal();
             
+            // scale
             GUILayout.BeginHorizontal();
             EditorGUIUtility.labelWidth = defaultLabelWidth - 28;
             EditorGUILayout.PrefixLabel(new GUIContent("Scale", "Local Scale"));
             EditorGUIUtility.labelWidth = defaultLabelWidth;
-            GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
+            GUI.backgroundColor = new Color32(223, 223, 223, 079);
             if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), buttonStyle1, GUILayout.Width(25), GUILayout.Height(20)))
             {
                 uniformScale = !uniformScale;
             }
-            GUI.backgroundColor = defaultBackground;
+            if(uniformScale) { GUI.backgroundColor = new Color32(223, 179, 000, 223); }
+            else { GUI.backgroundColor = defaultBackground; }
             ScaleGUI(transformTarget);
+            GUI.backgroundColor = defaultBackground;
             EditorGUIUtility.labelWidth = defaultLabelWidth;
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Scale to Vector3.one"), GUILayout.Width(20), GUILayout.Height(20)))
             {
@@ -89,7 +93,7 @@ namespace Gaskellgames
             // utilities
             EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
-            GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
+            GUI.backgroundColor = new Color32(223, 223, 223, 079);
             if(open) { label = "\u25cb Transform Utilities \u25cb "; } else { label = "\u25cf Transform Utilities \u25cf"; }
             GUILayout.FlexibleSpace();
             if (GUILayout.Button(new GUIContent(label, "View global properties"), buttonStyle2, GUILayout.Width(100), GUILayout.Height(buttonStyle2.fontSize)))
