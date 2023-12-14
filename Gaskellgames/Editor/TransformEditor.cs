@@ -7,63 +7,77 @@ using UnityEditor;
 
 namespace Gaskellgames
 {
-    [CustomEditor(typeof(Transform))] [CanEditMultipleObjects]
+    [CustomEditor(typeof(Transform)), CanEditMultipleObjects]
     public class TransformEditor : Editor
     {
-        #region Variables
+        #region Serialized Properties / OnEnable
 
+        SerializedProperty m_LocalPosition;
+        SerializedProperty m_LocalRotation;
+        SerializedProperty m_LocalScale;
+        //SerializedProperty m_ConstrainProportionsScale;
+        
         private static bool uniformScale;
         private static bool open;
         private static string label;
         private static string icon = "\u2E26\\\u2E27";
         private GUIStyle buttonStyle1 = new GUIStyle();
         private GUIStyle buttonStyle2 = new GUIStyle();
-        
         private Color32 textColor = new Color32(179, 179, 179, 255);
         private Color32 blankColor = new Color32(000, 000, 000, 000);
+        
+        private void OnEnable()
+        {
+            m_LocalPosition = serializedObject.FindProperty("m_LocalPosition");
+            m_LocalRotation = serializedObject.FindProperty("m_LocalRotation");
+            m_LocalScale = serializedObject.FindProperty("m_LocalScale");
+            //m_ConstrainProportionsScale = serializedObject.FindProperty("m_ConstrainProportionsScale");
+        }
         
         #endregion
 
         //----------------------------------------------------------------------------------------------------
 
-        #region On Events
+        #region OnInspectorGUI
         
         public override void OnInspectorGUI()
         {
+            // get & update references
             Transform transformTarget = (Transform)target;
             float defaultLabelWidth = EditorGUIUtility.labelWidth;
             Color defaultBackground = GUI.backgroundColor;
             CreateButtons();
             
-            // position
+            serializedObject.Update();
+            
             GUILayout.BeginHorizontal();
-            transformTarget.localPosition = EditorGUILayout.Vector3Field(new GUIContent("Position", "The local position of this GameObject relative to the parent"), transformTarget.localPosition);
+            EditorGUILayout.PrefixLabel("Position");
+            EditorGUILayout.PropertyField(m_LocalPosition, GUIContent.none);
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Position to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
             {
                 transformTarget.localPosition = Vector3.zero;
             }
             GUILayout.EndHorizontal();
-
-            // rotation (eulerAngles)
+            
             GUILayout.BeginHorizontal();
-            transformTarget.localEulerAngles = EditorGUILayout.Vector3Field(new GUIContent("Rotation", "The local rotation of this GameObject relative to the parent"), transformTarget.localEulerAngles);
+            EditorGUILayout.PrefixLabel("Rotation");
+            EditorGUILayout.PropertyField(m_LocalRotation, GUIContent.none);
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Rotation to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
             {
                 transformTarget.localEulerAngles = Vector3.zero;
             }
             GUILayout.EndHorizontal();
-
-            // scale
+            
             GUILayout.BeginHorizontal();
-            EditorGUIUtility.labelWidth = defaultLabelWidth - 25;
-            EditorGUILayout.PrefixLabel(new GUIContent("Scale", "The local scaling of this GameObject relative to the parent"));
+            EditorGUIUtility.labelWidth = defaultLabelWidth - 28;
+            EditorGUILayout.PrefixLabel("Scale");
+            EditorGUIUtility.labelWidth = defaultLabelWidth;
             GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
             if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), buttonStyle1, GUILayout.Width(25), GUILayout.Height(20)))
             {
                 uniformScale = !uniformScale;
             }
             GUI.backgroundColor = defaultBackground;
-            EditorGUIUtility.labelWidth = 0;
             ScaleGUI(transformTarget);
             EditorGUIUtility.labelWidth = defaultLabelWidth;
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Scale to Vector3.one"), GUILayout.Width(20), GUILayout.Height(20)))
@@ -71,7 +85,7 @@ namespace Gaskellgames
                 transformTarget.localScale = Vector3.one;
             }
             GUILayout.EndHorizontal();
-
+            
             // utilities
             EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
@@ -103,8 +117,11 @@ namespace Gaskellgames
                 GUILayout.EndHorizontal();
             }
             
-            // force update window (to have snappy hover)
+            // force update window (to have snappy hover on buttons)
             Repaint();
+            
+            // apply reference changes
+            serializedObject.ApplyModifiedProperties();
         }
 
         #endregion
@@ -235,13 +252,14 @@ namespace Gaskellgames
                         newScale.y = MathUtility.RoundFloat(originalScale.y * differenceZ, 2);
                     }
                     
-                    transformTarget.localScale = newScale;
+                    // set scale
+                    m_LocalScale.vector3Value = newScale;
                 }
             }
             else
             {
                 icon = "\u2E26\\\u2E27";
-                transformTarget.localScale = EditorGUILayout.Vector3Field("", transformTarget.localScale);
+                EditorGUILayout.PropertyField(m_LocalScale, GUIContent.none);
             }
         }
 
