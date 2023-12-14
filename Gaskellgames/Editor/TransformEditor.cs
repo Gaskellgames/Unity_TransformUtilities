@@ -51,26 +51,26 @@ namespace Gaskellgames
             serializedObject.Update();
             
             GUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Position");
+            EditorGUILayout.PrefixLabel(new GUIContent("Position", "Local Position"));
             EditorGUILayout.PropertyField(m_LocalPosition, GUIContent.none);
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Position to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
             {
-                transformTarget.localPosition = Vector3.zero;
+                m_LocalPosition.vector3Value = Vector3.zero;
             }
             GUILayout.EndHorizontal();
             
             GUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel("Rotation");
+            EditorGUILayout.PrefixLabel(new GUIContent("Rotation", "Local Rotation"));
             EditorGUILayout.PropertyField(m_LocalRotation, GUIContent.none);
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Rotation to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
             {
-                transformTarget.localEulerAngles = Vector3.zero;
+                m_LocalRotation.vector3Value = Vector3.zero;
             }
             GUILayout.EndHorizontal();
             
             GUILayout.BeginHorizontal();
             EditorGUIUtility.labelWidth = defaultLabelWidth - 28;
-            EditorGUILayout.PrefixLabel("Scale");
+            EditorGUILayout.PrefixLabel(new GUIContent("Scale", "Local Scale"));
             EditorGUIUtility.labelWidth = defaultLabelWidth;
             GUI.backgroundColor = new Color(1f, 1f, 1f, 0.25f);
             if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), buttonStyle1, GUILayout.Width(25), GUILayout.Height(20)))
@@ -82,7 +82,7 @@ namespace Gaskellgames
             EditorGUIUtility.labelWidth = defaultLabelWidth;
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Scale to Vector3.one"), GUILayout.Width(20), GUILayout.Height(20)))
             {
-                transformTarget.localScale = Vector3.one;
+                m_LocalScale.vector3Value = Vector3.one;
             }
             GUILayout.EndHorizontal();
             
