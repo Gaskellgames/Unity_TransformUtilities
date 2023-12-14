@@ -65,7 +65,7 @@ namespace Gaskellgames
             EditorGUILayout.PropertyField(m_LocalRotation, GUIContent.none);
             if (GUILayout.Button(new GUIContent("\u21BA", "Reset Rotation to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
             {
-                m_LocalRotation.vector3Value = Vector3.zero;
+                m_LocalRotation.quaternionValue = new Quaternion();
             }
             GUILayout.EndHorizontal();
             
@@ -79,7 +79,7 @@ namespace Gaskellgames
             {
                 uniformScale = !uniformScale;
             }
-            if(uniformScale) { GUI.backgroundColor = new Color32(223, 179, 000, 255); }
+            if(uniformScale) { GUI.backgroundColor = new Color32(255, 179, 000, 255); }
             else { GUI.backgroundColor = defaultBackground; }
             ScaleGUI(transformTarget);
             GUI.backgroundColor = defaultBackground;
