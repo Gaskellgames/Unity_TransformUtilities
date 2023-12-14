@@ -79,7 +79,7 @@ namespace Gaskellgames
             {
                 uniformScale = !uniformScale;
             }
-            if(uniformScale) { GUI.backgroundColor = new Color32(223, 179, 000, 223); }
+            if(uniformScale) { GUI.backgroundColor = new Color32(223, 179, 000, 255); }
             else { GUI.backgroundColor = defaultBackground; }
             ScaleGUI(transformTarget);
             GUI.backgroundColor = defaultBackground;
