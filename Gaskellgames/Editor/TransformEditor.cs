@@ -20,14 +20,18 @@ namespace Gaskellgames
         private static bool uniformScale;
         private static bool open;
         private static string label;
-        private static string icon = "\u2E26\\\u2E27";
-        private GUIStyle buttonStyle1 = new GUIStyle();
+        private static string iconReset = "UnLinked";
+        private static string iconScale;
+        private static string iconLinked = "Linked"; // or "Linked@2x"
+        private static string iconUnlinked = "UnLinked"; // or "UnLinked@2x"
+        private GUIStyle iconButtonStyle = new GUIStyle();
         private GUIStyle buttonStyle2 = new GUIStyle();
         private Color32 textColor = new Color32(179, 179, 179, 255);
         private Color32 blankColor = new Color32(000, 000, 000, 000);
         
         private void OnEnable()
         {
+            iconScale = iconLinked;
             m_LocalPosition = serializedObject.FindProperty("m_LocalPosition");
             m_LocalRotation = serializedObject.FindProperty("m_LocalRotation");
             m_LocalScale = serializedObject.FindProperty("m_LocalScale");
@@ -53,7 +57,7 @@ namespace Gaskellgames
             GUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(new GUIContent("Position", "Local Position"));
             EditorGUILayout.PropertyField(m_LocalPosition, GUIContent.none);
-            if (GUILayout.Button(new GUIContent("\u21BA", "Reset Position to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
+            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset Position to Vector3.zero"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
             {
                 m_LocalPosition.vector3Value = Vector3.zero;
             }
@@ -63,7 +67,7 @@ namespace Gaskellgames
             GUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(new GUIContent("Rotation", "Local Rotation"));
             EditorGUILayout.PropertyField(m_LocalRotation, GUIContent.none);
-            if (GUILayout.Button(new GUIContent("\u21BA", "Reset Rotation to Vector3.zero"), GUILayout.Width(20), GUILayout.Height(20)))
+            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset Rotation to Vector3.zero"), iconButtonStyle,  GUILayout.Width(20), GUILayout.Height(20)))
             {
                 m_LocalRotation.quaternionValue = new Quaternion();
             }
@@ -71,20 +75,20 @@ namespace Gaskellgames
             
             // scale
             GUILayout.BeginHorizontal();
-            EditorGUIUtility.labelWidth = defaultLabelWidth - 28;
+            EditorGUIUtility.labelWidth = defaultLabelWidth - 23;
             EditorGUILayout.PrefixLabel(new GUIContent("Scale", "Local Scale"));
             EditorGUIUtility.labelWidth = defaultLabelWidth;
             GUI.backgroundColor = new Color32(223, 223, 223, 079);
-            if (GUILayout.Button(new GUIContent(icon, "Enable constrained proportions:\n⸦⸧ True, ⸦/⸧ False"), buttonStyle1, GUILayout.Width(25), GUILayout.Height(20)))
+            if (GUILayout.Button(EditorGUIUtility.IconContent(iconScale, "Enable constrained proportions"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
             {
                 uniformScale = !uniformScale;
             }
-            if(uniformScale) { GUI.backgroundColor = new Color32(255, 179, 000, 255); }
+            if(uniformScale) { GUI.backgroundColor = new Color32(000, 179, 223, 255); }
             else { GUI.backgroundColor = defaultBackground; }
             ScaleGUI(transformTarget);
             GUI.backgroundColor = defaultBackground;
             EditorGUIUtility.labelWidth = defaultLabelWidth;
-            if (GUILayout.Button(new GUIContent("\u21BA", "Reset Scale to Vector3.one"), GUILayout.Width(20), GUILayout.Height(20)))
+            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset Scale to Vector3.one"), iconButtonStyle,GUILayout.Width(20), GUILayout.Height(20)))
             {
                 m_LocalScale.vector3Value = Vector3.one;
             }
@@ -94,9 +98,8 @@ namespace Gaskellgames
             EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
             GUI.backgroundColor = new Color32(223, 223, 223, 079);
-            if(open) { label = "\u25cb Transform Utilities \u25cb "; } else { label = "\u25cf Transform Utilities \u25cf"; }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(new GUIContent(label, "View global properties"), buttonStyle2, GUILayout.Width(100), GUILayout.Height(buttonStyle2.fontSize)))
+            if (GUILayout.Button(new GUIContent("Transform Utilities", "View global properties"), buttonStyle2, GUILayout.Width(100), GUILayout.Height(buttonStyle2.fontSize)))
             {
                 open = !open;
             }
@@ -141,17 +144,17 @@ namespace Gaskellgames
             Color32 activeColor = new Color32(000, 128, 223, 255);
             Color32 activeBorderColor = new Color32(010, 010, 010, 255);
         
-            // button 1
-            buttonStyle1.fontSize = 9;
-            buttonStyle1.alignment = TextAnchor.MiddleCenter;
-            buttonStyle1.normal.textColor = textColor;
-            buttonStyle1.hover.textColor = textColor;
-            buttonStyle1.active.textColor = textColor;
-            buttonStyle1.normal.background = CreateTexture(20, 20, 1, true, blankColor, blankColor);
-            buttonStyle1.hover.background = CreateTexture(20, 20, 1, true, hoverColor, hoverBorderColor);
-            buttonStyle1.active.background = CreateTexture(20, 20, 1, true, activeColor, activeBorderColor);
+            // button style 1
+            iconButtonStyle.fontSize = 9;
+            iconButtonStyle.alignment = TextAnchor.MiddleCenter;
+            iconButtonStyle.normal.textColor = textColor;
+            iconButtonStyle.hover.textColor = textColor;
+            iconButtonStyle.active.textColor = textColor;
+            iconButtonStyle.normal.background = CreateTexture(20, 20, 1, true, blankColor, blankColor);
+            iconButtonStyle.hover.background = CreateTexture(20, 20, 1, true, hoverColor, hoverBorderColor);
+            iconButtonStyle.active.background = CreateTexture(20, 20, 1, true, activeColor, activeBorderColor);
             
-            // button 2
+            // button style 2
             buttonStyle2.fontSize = 10;
             buttonStyle2.normal.textColor = Color.grey;
         }
@@ -223,7 +226,7 @@ namespace Gaskellgames
             Undo.RecordObject(transformTarget, "transform scale updated");
             if (uniformScale)
             {
-                icon = "\u2E26\u2E27";
+                iconScale = iconLinked;
                 Vector3 originalScale = transformTarget.localScale;
                 Vector3 newScale = originalScale;
                 
@@ -242,18 +245,18 @@ namespace Gaskellgames
 
                     if (differenceX != 1)
                     {
-                        newScale.y = MathUtility.RoundFloat(originalScale.y * differenceX, 2);
-                        newScale.z = MathUtility.RoundFloat(originalScale.z * differenceX, 2);
+                        newScale.y = RoundFloat(originalScale.y * differenceX, 2);
+                        newScale.z = RoundFloat(originalScale.z * differenceX, 2);
                     }
                     else if (differenceY != 1)
                     {
-                        newScale.x = MathUtility.RoundFloat(originalScale.x * differenceY, 2);
-                        newScale.z = MathUtility.RoundFloat(originalScale.z * differenceY, 2);
+                        newScale.x = RoundFloat(originalScale.x * differenceY, 2);
+                        newScale.z = RoundFloat(originalScale.z * differenceY, 2);
                     }
                     else if (differenceZ != 1)
                     {
-                        newScale.x = MathUtility.RoundFloat(originalScale.x * differenceZ, 2);
-                        newScale.y = MathUtility.RoundFloat(originalScale.y * differenceZ, 2);
+                        newScale.x = RoundFloat(originalScale.x * differenceZ, 2);
+                        newScale.y = RoundFloat(originalScale.y * differenceZ, 2);
                     }
                     
                     // set scale
@@ -262,9 +265,17 @@ namespace Gaskellgames
             }
             else
             {
-                icon = "\u2E26\\\u2E27";
+                iconScale = iconUnlinked;
                 EditorGUILayout.PropertyField(m_LocalScale, GUIContent.none);
             }
+        }
+
+        private float RoundFloat(float value, int decimalPlaces)
+        {
+            float multiplier = Mathf.Pow(10f, decimalPlaces);
+            float roundedValue = Mathf.Round(value * multiplier) / multiplier;
+
+            return roundedValue;
         }
 
         #endregion
