@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEditor;
+using UnityEditor; 
 
 /// <summary>
 /// Code created by Gaskellgames: https://github.com/Gaskellgames/Unity_TransformUtilities
@@ -22,12 +22,10 @@ namespace Gaskellgames
         private static string label;
         private static string iconReset = "UnLinked";
         private static string iconScale;
-        private static string iconLinked = "Linked"; // or "Linked@2x"
-        private static string iconUnlinked = "UnLinked"; // or "UnLinked@2x"
+        private static string iconLinked = "Linked";
+        private static string iconUnlinked = "UnLinked";
         private GUIStyle iconButtonStyle = new GUIStyle();
         private GUIStyle buttonStyle2 = new GUIStyle();
-        private Color32 textColor = new Color32(179, 179, 179, 255);
-        private Color32 blankColor = new Color32(000, 000, 000, 000);
         
         private void OnEnable()
         {
@@ -55,9 +53,9 @@ namespace Gaskellgames
             
             // position
             GUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(new GUIContent("Position", "Local Position"));
+            EditorGUILayout.PrefixLabel(new GUIContent("Position", "The local position of this gameObject, relative to it's parent gameObject"));
             EditorGUILayout.PropertyField(m_LocalPosition, GUIContent.none);
-            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset Position to Vector3.zero"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
+            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset local position to Vector3.zero"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
             {
                 m_LocalPosition.vector3Value = Vector3.zero;
             }
@@ -65,9 +63,9 @@ namespace Gaskellgames
             
             // rotation
             GUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(new GUIContent("Rotation", "Local Rotation"));
+            EditorGUILayout.PrefixLabel(new GUIContent("Rotation", "The local rotation of this gameObject, relative to it's parent gameObject"));
             EditorGUILayout.PropertyField(m_LocalRotation, GUIContent.none);
-            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset Rotation to Vector3.zero"), iconButtonStyle,  GUILayout.Width(20), GUILayout.Height(20)))
+            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset local rotation to Vector3.zero"), iconButtonStyle,  GUILayout.Width(20), GUILayout.Height(20)))
             {
                 m_LocalRotation.quaternionValue = new Quaternion();
             }
@@ -76,7 +74,7 @@ namespace Gaskellgames
             // scale
             GUILayout.BeginHorizontal();
             EditorGUIUtility.labelWidth = defaultLabelWidth - 23;
-            EditorGUILayout.PrefixLabel(new GUIContent("Scale", "Local Scale"));
+            EditorGUILayout.PrefixLabel(new GUIContent("Scale", "The local scaling of this gameObject, relative to it's parent gameObject"));
             EditorGUIUtility.labelWidth = defaultLabelWidth;
             GUI.backgroundColor = new Color32(223, 223, 223, 079);
             if (GUILayout.Button(EditorGUIUtility.IconContent(iconScale, "Enable constrained proportions"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
@@ -88,7 +86,7 @@ namespace Gaskellgames
             ScaleGUI(transformTarget);
             GUI.backgroundColor = defaultBackground;
             EditorGUIUtility.labelWidth = defaultLabelWidth;
-            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset Scale to Vector3.one"), iconButtonStyle,GUILayout.Width(20), GUILayout.Height(20)))
+            if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset local scale to Vector3.one"), iconButtonStyle,GUILayout.Width(20), GUILayout.Height(20)))
             {
                 m_LocalScale.vector3Value = Vector3.one;
             }
@@ -139,86 +137,19 @@ namespace Gaskellgames
 
         private void CreateButtons()
         {
-            Color32 hoverColor = new Color32(099, 099, 099, 255);
-            Color32 hoverBorderColor = new Color32(028, 028, 028, 255);
-            Color32 activeColor = new Color32(000, 128, 223, 255);
-            Color32 activeBorderColor = new Color32(010, 010, 010, 255);
-        
             // button style 1
             iconButtonStyle.fontSize = 9;
             iconButtonStyle.alignment = TextAnchor.MiddleCenter;
-            iconButtonStyle.normal.textColor = textColor;
-            iconButtonStyle.hover.textColor = textColor;
-            iconButtonStyle.active.textColor = textColor;
-            iconButtonStyle.normal.background = CreateTexture(20, 20, 1, true, blankColor, blankColor);
-            iconButtonStyle.hover.background = CreateTexture(20, 20, 1, true, hoverColor, hoverBorderColor);
-            iconButtonStyle.active.background = CreateTexture(20, 20, 1, true, activeColor, activeBorderColor);
+            iconButtonStyle.normal.textColor = InspectorUtility.textNormalColor;
+            iconButtonStyle.hover.textColor = InspectorUtility.textNormalColor;
+            iconButtonStyle.active.textColor = InspectorUtility.textNormalColor;
+            iconButtonStyle.normal.background = InspectorUtility.CreateTexture(20, 20, 1, true, InspectorUtility.blankColor, InspectorUtility.blankColor);
+            iconButtonStyle.hover.background = InspectorUtility.CreateTexture(20, 20, 1, true, InspectorUtility.buttonHoverColor, InspectorUtility.buttonHoverBorderColor);
+            iconButtonStyle.active.background = InspectorUtility.CreateTexture(20, 20, 1, true, InspectorUtility.buttonActiveColor, InspectorUtility.buttonActiveBorderColor);
             
             // button style 2
             buttonStyle2.fontSize = 10;
-            buttonStyle2.normal.textColor = Color.grey;
-        }
-        
-        private Texture2D CreateTexture(int width, int height, int border, bool isRounded, Color32 backgroundColor, Color32 borderColor)
-        {
-            Color[] pixels = new Color[width * height];
-            int pixelIndex = 0;
-
-            if (isRounded)
-            {
-                for (int i = 0; i < width; i++)
-                {
-                    for (int j = 0; j < height; j++)
-                    {
-                        // if at corner add corner color
-                        if ((i < border || i >= width - border) && (j < border || j >= width - border))
-                        {
-                            pixels[pixelIndex] = blankColor;
-                        }
-                        // otherwise if on border... 
-                        else if ((i < border || i >= width - border || j < border || j >= width - border)
-                                 || ((i < border*2 || i >= width - border*2) && (j < border*2 || j >= width - border*2)))
-                        {
-                            // ... add border color
-                            pixels[pixelIndex] = borderColor;
-                        }
-                        else
-                        {
-                            // ... otherwise add background color
-                            pixels[pixelIndex] = backgroundColor;
-                        }
-
-                        pixelIndex++;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < width; i++)
-                {
-                    for (int j = 0; j < height; j++)
-                    {
-                        // if on border... 
-                        if (i < border || i >= width - border || j < border || j >= width - border)
-                        {
-                            // ... add border color
-                            pixels[pixelIndex] = borderColor;
-                        }
-                        else
-                        {
-                            // ... otherwise add background color
-                            pixels[pixelIndex] = backgroundColor;
-                        }
-
-                        pixelIndex++;
-                    }
-                }
-            }
-   
-            Texture2D result = new Texture2D(width, height);
-            result.SetPixels(pixels);
-            result.Apply();
-            return result;
+            buttonStyle2.normal.textColor = InspectorUtility.textDisabledColor;
         }
         
         private void ScaleGUI(Transform transformTarget)
