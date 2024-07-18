@@ -1,12 +1,14 @@
+#if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor; 
+using UnityEditor;
 
 /// <summary>
 /// Code created by Gaskellgames: https://github.com/Gaskellgames/Unity_TransformUtilities
 /// </summary>
 
-namespace Gaskellgames
+namespace Gaskellgames.EditorHelper
 {
     [CustomEditor(typeof(Transform)), CanEditMultipleObjects]
     public class TransformEditor : Editor
@@ -14,6 +16,7 @@ namespace Gaskellgames
         #region Serialized Properties & Variables
         
         private Editor transformEditor;
+        List<Transform> transformTargets = new List<Transform>();
         private Rect[] repaintPositions = new Rect[4];
         private GUIStyle iconButtonStyle = new GUIStyle();
         private GUIStyle buttonStyle2 = new GUIStyle();
@@ -29,13 +32,10 @@ namespace Gaskellgames
 
         private void OnEnable()
         {
-            // transform wrapper
-            Transform transform = target as Transform;
-            Type t = typeof(EditorApplication).Assembly.GetType("UnityEditor.TransformInspector");
-            transformEditor = CreateEditor(transform, t);
+            AssignTransformEditor();
         }
 
-        void OnDisable()
+        private void OnDisable()
         {
             DestroyImmediate(transformEditor);
         }
@@ -56,13 +56,13 @@ namespace Gaskellgames
             else
             {
                 serializedObject.Update();
-                Transform transformTarget = (Transform)target;
                 repaintPositions = new Rect[4];
                 CreateButtons();
-            
+                
                 // draw inspector
-                OnInspectorGUI_WrappedTransform(transformTarget);
-                OnInspectorGUI_TransformUtilities(transformTarget);
+                AssignSelectedTargets();
+                OnInspectorGUI_WrappedTransform(transformTargets);
+                OnInspectorGUI_TransformUtilities(transformTargets);
             
                 // force update window (to have snappy hover on buttons) if mouse over buttons
                 foreach (var repaintPosition in repaintPositions)
@@ -78,7 +78,7 @@ namespace Gaskellgames
             }
         }
 
-        private void OnInspectorGUI_WrappedTransform(Transform transformTarget)
+        private void OnInspectorGUI_WrappedTransform(List<Transform> transformTargets)
         {
             GUILayout.BeginHorizontal();
             
@@ -91,22 +91,52 @@ namespace Gaskellgames
             GUILayout.BeginVertical(GUILayout.Width(20));
             if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset local position to Vector3.zero"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
             {
-                transformTarget.localPosition = Vector3.zero;
-                Debug.Log($"Local position reset for '{serializedObject.targetObject.name}'", this);
+                string names = "";
+                foreach (var transform in transformTargets)
+                {
+                    if (transform.localPosition == Vector3.zero) { continue;}
+                    transform.localPosition = Vector3.zero;
+                    names += names == "" ? transform.gameObject.name : ", " + transform.gameObject.name;
+                }
+                if (names != "")
+                {
+                    AssignTransformEditor();
+                    Debug.Log($"Local position reset for '{names}'", this);
+                }
             }
             repaintPositions[0] = GUILayoutUtility.GetLastRect();
             GUILayout.Space(1);
             if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset local rotation to Vector3.zero"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
             {
-                transformTarget.localEulerAngles = Vector3.zero;
-                Debug.Log($"Local Rotation reset for '{serializedObject.targetObject.name}'", this);
+                string names = "";
+                foreach (var transform in transformTargets)
+                {
+                    if (transform.localEulerAngles == Vector3.zero) { continue;}
+                    transform.localEulerAngles = Vector3.zero;
+                    names += names == "" ? transform.gameObject.name : ", " + transform.gameObject.name;
+                }
+                if (names != "")
+                {
+                    AssignTransformEditor();
+                    Debug.Log($"Local position reset for '{names}'", this);
+                }
             }
             repaintPositions[1] = GUILayoutUtility.GetLastRect();
             GUILayout.Space(1);
             if (GUILayout.Button(EditorGUIUtility.IconContent("d_Refresh", "Reset local scale to Vector3.one"), iconButtonStyle, GUILayout.Width(20), GUILayout.Height(20)))
             {
-                transformTarget.localScale = Vector3.one;
-                Debug.Log($"Local Scale reset for '{serializedObject.targetObject.name}'", this);
+                string names = "";
+                foreach (var transform in transformTargets)
+                {
+                    if (transform.localScale == Vector3.one) { continue;}
+                    transform.localScale = Vector3.one;
+                    names += names == "" ? transform.gameObject.name : ", " + transform.gameObject.name;
+                }
+                if (names != "")
+                {
+                    AssignTransformEditor();
+                    Debug.Log($"Local position reset for '{names}'", this);
+                }
             }
             repaintPositions[2] = GUILayoutUtility.GetLastRect();
             GUILayout.EndVertical();
@@ -114,14 +144,14 @@ namespace Gaskellgames
             GUILayout.EndHorizontal();
         }
 
-        private void OnInspectorGUI_TransformUtilities(Transform transformTarget)
+        private void OnInspectorGUI_TransformUtilities(List<Transform> transformTargets)
         {
             // get & update references
             Color defaultBackground = GUI.backgroundColor;
             
             // scale warning: top
             EditorGUILayout.Space();
-            DrawScaleWarning(transformTarget, 1, -2);
+            DrawScaleWarning(transformTargets, 1, -2);
             
             // utilities
             BeginCustomInspectorBackground(InspectorExtensions.backgroundNormalColor, 1, -3);
@@ -142,16 +172,25 @@ namespace Gaskellgames
             {
                 GUI.enabled = false;
                 GUILayout.Space(2);
-                EditorGUILayout.Vector3Field("Global Position", transformTarget.position);
-                EditorGUILayout.Vector3Field("Global Rotation", transformTarget.eulerAngles);
-                EditorGUILayout.Vector3Field("Lossy Scale", transformTarget.lossyScale);
-                GUILayout.Space(2);
-                if (transformTarget.localScale != Vector3.one || transformTarget.lossyScale != Vector3.one)
+                if (1 == transformTargets.Count && NonUniformScaleInObject(transformTargets[0]) || NonUniformScaleInParent(transformTargets))
                 {
                     // non-uniform scale
                     GUI.enabled = true;
                     EditorGUILayout.HelpBox("Non-uniform scale detected. It is recommended to keep scale at '1, 1, 1' where possible.", MessageType.Warning);
                     GUI.enabled = false;
+                }
+                GUILayout.Space(2);
+                if (1 == targets.Length)
+                {
+                    EditorGUILayout.Vector3Field("Global Position", transformTargets[0].position);
+                    EditorGUILayout.Vector3Field("Global Rotation", transformTargets[0].eulerAngles);
+                    EditorGUILayout.Vector3Field("Lossy Scale", transformTargets[0].lossyScale);
+                }
+                else
+                {
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.LabelField("Global properties only available when a single object is selected.");
+                    GUILayout.FlexibleSpace();
                 }
                 GUILayout.Space(2);
                 GUI.enabled = true;
@@ -160,7 +199,7 @@ namespace Gaskellgames
             EndCustomInspectorBackground();
             
             // scale warning: bottom
-            DrawScaleWarning(transformTarget, 2, -3);
+            DrawScaleWarning(transformTargets, 2, -3);
         }
 
         #endregion
@@ -169,14 +208,36 @@ namespace Gaskellgames
         
         #region Private Functions
 
-        private void DrawScaleWarning(Transform transformTarget, float paddingTop = -4F, float paddingBottom = -15F, float paddingLeft = -18F, float paddingRight = -4F)
+        private void AssignTransformEditor()
         {
-            if (transformTarget.localScale != Vector3.one)
+            DestroyImmediate(transformEditor);
+            
+            Transform thisTarget = (Transform)target;
+            Type type = typeof(EditorApplication).Assembly.GetType("UnityEditor.TransformInspector");
+            transformEditor = CreateEditorWithContext(targets, thisTarget, type);
+        }
+
+        private void AssignSelectedTargets()
+        {
+            transformTargets.Clear();
+            foreach (var targetObject in targets)
+            {
+                Transform transform = (Transform)targetObject;
+                if (!transformTargets.Contains(transform))
+                {
+                    transformTargets.Add(transform);
+                }
+            }
+        }
+        
+        private void DrawScaleWarning(List<Transform> transformTargets, float paddingTop = -4F, float paddingBottom = -15F, float paddingLeft = -18F, float paddingRight = -4F)
+        {
+            if (1 == transformTargets.Count && NonUniformScaleInObject(transformTargets[0]))
             {
                 BeginCustomInspectorBackground(new Color32(223, 050, 050, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
                 EndCustomInspectorBackground();
             }
-            else if (transformTarget.lossyScale != Vector3.one)
+            else if (NonUniformScaleInParent(transformTargets))
             {
                 BeginCustomInspectorBackground(new Color32(179, 128, 000, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
                 EndCustomInspectorBackground();
@@ -186,6 +247,21 @@ namespace Gaskellgames
                 BeginCustomInspectorBackground(new Color32(028, 128, 028, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
                 EndCustomInspectorBackground();
             }
+        }
+
+        private bool NonUniformScaleInParent(List<Transform> transformTargets)
+        {
+            foreach (var transformTarget in transformTargets)
+            {
+                if (transformTarget.lossyScale != Vector3.one) { return true; }
+            }
+            
+            return false;
+        }
+
+        private bool NonUniformScaleInObject(Transform transformTarget)
+        {
+            return transformTarget.localScale != Vector3.one;
         }
         
         private void CreateButtons()
@@ -230,3 +306,5 @@ namespace Gaskellgames
 
     } // class end
 }
+
+#endif
