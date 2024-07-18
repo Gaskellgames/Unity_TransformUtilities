@@ -99,6 +99,8 @@ namespace Gaskellgames.EditorOnly
                 foreach (var transform in transformTargets)
                 {
                     if (transform.localPosition == Vector3.zero) { continue;}
+                    
+                    Undo.RecordObject(transform, $"Local position reset for {transform.gameObject.name}");
                     transform.localPosition = Vector3.zero;
                     names += names == "" ? transform.gameObject.name : ", " + transform.gameObject.name;
                 }
@@ -116,13 +118,14 @@ namespace Gaskellgames.EditorOnly
                 foreach (var transform in transformTargets)
                 {
                     if (transform.localEulerAngles == Vector3.zero) { continue;}
+                    Undo.RecordObject(transform, $"Local rotation reset for {transform.gameObject.name}");
                     transform.localEulerAngles = Vector3.zero;
                     names += names == "" ? transform.gameObject.name : ", " + transform.gameObject.name;
                 }
                 if (names != "")
                 {
                     //AssignTransformEditor();
-                    Debug.Log($"Local position reset for '{names}'", this);
+                    Debug.Log($"Local rotation reset for '{names}'", this);
                 }
             }
             repaintPositions[1] = GUILayoutUtility.GetLastRect();
@@ -133,13 +136,14 @@ namespace Gaskellgames.EditorOnly
                 foreach (var transform in transformTargets)
                 {
                     if (transform.localScale == Vector3.one) { continue;}
+                    Undo.RecordObject(transform, $"Local scale reset for {transform.gameObject.name}");
                     transform.localScale = Vector3.one;
                     names += names == "" ? transform.gameObject.name : ", " + transform.gameObject.name;
                 }
                 if (names != "")
                 {
                     //AssignTransformEditor();
-                    Debug.Log($"Local position reset for '{names}'", this);
+                    Debug.Log($"Local scale reset for '{names}'", this);
                 }
             }
             repaintPositions[2] = GUILayoutUtility.GetLastRect();
