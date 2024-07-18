@@ -1,10 +1,12 @@
+#if UNITY_EDITOR
 using UnityEngine;
+using UnityEditor;
 
 /// <summary>
-/// Code created by Gaskellgames
+/// Code created by Gaskellgames: https://github.com/Gaskellgames
 /// </summary>
 
-namespace Gaskellgames
+namespace Gaskellgames.EditorOnly
 {
     public static class InspectorExtensions
     {
@@ -12,6 +14,8 @@ namespace Gaskellgames
 
         // blank
         public static readonly Color32 blankColor = new Color32(000, 000, 000, 000);
+        public static readonly Color32 cyanColor = new Color32(000, 179, 223, 255);
+        public static readonly Color32 yellowColor = new Color32(223, 179, 000, 255);
         
         // background
         public static readonly Color32 backgroundNormalColorLight = new Color32(056, 056, 056, 255);
@@ -19,8 +23,11 @@ namespace Gaskellgames
         public static readonly Color32 backgroundNormalColorDark = new Color32(045, 045, 045, 255);
         public static readonly Color32 backgroundActiveColor = new Color32(044, 093, 135, 255);
         public static readonly Color32 backgroundHoverColor = new Color32(056, 056, 056, 255);
+        
         public static readonly Color32 backgroundShadowColor = new Color32(042, 042, 042, 255);
-        public static readonly Color32 backgroundSeperatorColor = new Color32(035, 035, 035, 255);
+        
+        public static readonly Color32 backgroundSeperatorColor = new Color32(079, 079, 079, 255);
+        public static readonly Color32 backgroundSeperatorColorDark = new Color32(035, 035, 035, 255);
         
         // selected
         public static readonly Color32 buttonSelectedColor = new Color32(128, 179, 223, 255);
@@ -40,6 +47,110 @@ namespace Gaskellgames
         //----------------------------------------------------------------------------------------------------
         
         #region Helper Functions
+
+        /// <summary>
+        /// start custom inspector background with a defined color and padding.
+        /// Default values of padding are set to account for inspector rect offsets:
+        /// paddingTop = -4, paddingBottom = -15, paddingLeft = -18, paddingRight = -4
+        /// </summary>
+        /// <param name="backgroundColor"></param>
+        public static void BeginCustomInspectorBackground(Color32 backgroundColor, float paddingTop = -4, float paddingBottom = -15, float paddingLeft = -18, float paddingRight = -4)
+        {
+            // cache variables
+            Rect screenRect = GUILayoutUtility.GetRect(1, 1);
+            Rect verticalRect = EditorGUILayout.BeginVertical();
+            
+            // calculate rect size
+            float xMin = screenRect.x + paddingLeft;
+            float yMin = screenRect.y + paddingTop;
+            float width = screenRect.width - (paddingLeft + paddingRight);
+            float height = verticalRect.height - (paddingTop + paddingBottom);
+            
+            // draw background rect
+            EditorGUI.DrawRect(new Rect(xMin, yMin, width, height), backgroundColor);
+        }
+
+        /// <summary>
+        /// end custom inspector background
+        /// </summary>
+        public static void EndCustomInspectorBackground()
+        {
+            EditorGUILayout.EndVertical();
+        }
+        
+        /// <summary>
+        /// Force repaint the inspector for a targetObject via a SerializedProperty reference
+        /// </summary>
+        /// <param name="property"></param>
+        public static void RepaintInspector(SerializedProperty property)
+        {
+            EditorUtility.SetDirty(property.serializedObject.targetObject); // Repaint
+        }
+        
+        /// <summary>
+        /// Start a foldout group (nestable)
+        /// </summary>
+        /// <param name="label">Label used for label text and tooltip</param>
+        /// <param name="isOpen">Reference to a bool to be used to store if the foldout group is open</param>
+        /// <param name="style">The style to be used for the vertical group (i.e "Box")</param>
+        /// <returns></returns>
+        public static bool BeginFoldoutGroupNestable(GUIContent label, ref bool isOpen, GUIStyle style, int paddingTop = 0, int paddingBottom = 0)
+        {
+            EditorGUILayout.BeginVertical(style);
+            GUILayout.Space(paddingTop);
+            
+            string icon = "d_IN_foldout";
+            if (isOpen) { icon = "d_IN_foldout_on"; }
+            Texture iconTexture = EditorGUIUtility.IconContent(icon).image;
+            
+            bool defaultState = GUI.enabled;
+            GUI.enabled = true;
+            if (GUILayout.Button(new GUIContent(label.text, iconTexture, label.tooltip), Style_DropdownButton(), GUILayout.ExpandWidth(true)))
+            {
+                isOpen = !isOpen;
+            }
+            GUI.enabled = defaultState;
+            
+            GUILayout.Space(paddingBottom);
+            
+            return isOpen;
+        }
+
+        /// <summary>
+        /// End a foldout group (nestable)
+        /// </summary>
+        public static void EndFoldoutGroupNestable()
+        {
+            EditorGUILayout.EndVertical();
+        }
+        
+        /// <summary>
+        /// Draw a horizontal line across the whole of the inspector
+        /// </summary>
+        /// <param name="lineColor"></param>
+        /// <param name="addSpaceBefore"></param>
+        /// <param name="addSpaceAfter"></param>
+        public static void DrawInspectorLine(Color32 lineColor, bool addSpaceBefore = false, bool addSpaceAfter = false)
+        {
+            // add space before?
+            if (addSpaceBefore) { EditorGUILayout.Space(); }
+            
+            // draw line and reset gui color
+            Color defaultGUIColor = GUI.color;
+            GUI.color = lineColor;
+            GUIStyle horizontalLine = new GUIStyle
+            {
+                normal = { background = EditorGUIUtility.whiteTexture },
+                margin = new RectOffset( 0, 0, 4, 4 ),
+                fixedHeight = 1
+            };
+            
+            GUILayout.Box(GUIContent.none, horizontalLine);
+            GUI.color = defaultGUIColor;
+            
+            // add space after?
+            if (addSpaceAfter) { EditorGUILayout.Space(); }
+        }
         
         public static Texture2D CreateTexture(int width, int height, int border, bool isRounded, Color32 backgroundColor, Color32 borderColor)
         {
@@ -105,6 +216,9 @@ namespace Gaskellgames
         
         public static Texture2D TintTexture(Texture2D texture2D, Color tint)
         {
+            // null check
+            if (!texture2D) { return null; }
+            
             int width = texture2D.width;
             int height = texture2D.height;
             Color[] pixels = new Color[width * height];
@@ -127,6 +241,9 @@ namespace Gaskellgames
         
         public static Texture2D AddBorderToTexture(Texture2D texture2D, Color borderColor, int borderThickness)
         {
+            // null check
+            if (!texture2D) { return null; }
+            
             int width = texture2D.width;
             int height = texture2D.height;
             Color[] pixels = new Color[width * height];
@@ -226,16 +343,30 @@ namespace Gaskellgames
             return buttonStyle;
         }
         
-        public static GUIStyle Style_StealthButton()
+        public static GUIStyle Style_StealthButton(TextAnchor alignment = TextAnchor.MiddleCenter)
         {
             GUIStyle buttonStyle = new GUIStyle();
+            buttonStyle.alignment = alignment;
             buttonStyle.fontSize = 10;
             buttonStyle.normal.textColor = Color.grey;
             
             return buttonStyle;
+        }
+        
+        private static GUIStyle Style_DropdownButton()
+        {
+            GUIStyle dropdownStyle = new GUIStyle();
+            dropdownStyle.fontSize = 12;
+            dropdownStyle.fontStyle = FontStyle.Bold;
+            dropdownStyle.normal.textColor = textNormalColor;
+            dropdownStyle.hover.textColor = textNormalColor;
+            dropdownStyle.active.textColor = textNormalColor;
+
+            return dropdownStyle;
         }
 
         #endregion
         
     } // class end
 }
+#endif
