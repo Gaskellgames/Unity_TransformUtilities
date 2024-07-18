@@ -158,7 +158,7 @@ namespace Gaskellgames.EditorOnly
             DrawScaleWarning(transformTargets, 1, -2);
             
             // utilities
-            BeginCustomInspectorBackground(InspectorExtensions.backgroundNormalColor, 1, -3);
+            InspectorExtensions.BeginCustomInspectorBackground(InspectorExtensions.backgroundNormalColor, 1, -3);
             GUILayout.Space(2);
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -200,7 +200,7 @@ namespace Gaskellgames.EditorOnly
                 GUI.enabled = true;
             }
             GUILayout.Space(2);
-            EndCustomInspectorBackground();
+            InspectorExtensions.EndCustomInspectorBackground();
             
             // scale warning: bottom
             DrawScaleWarning(transformTargets, 2, -3);
@@ -234,18 +234,18 @@ namespace Gaskellgames.EditorOnly
         {
             if (1 == transformTargets.Count && NonUniformScaleInObject(transformTargets[0]))
             {
-                BeginCustomInspectorBackground(new Color32(223, 050, 050, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
-                EndCustomInspectorBackground();
+                InspectorExtensions.BeginCustomInspectorBackground(new Color32(223, 050, 050, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
+                InspectorExtensions.EndCustomInspectorBackground();
             }
             else if (NonUniformScaleInParent(transformTargets))
             {
-                BeginCustomInspectorBackground(new Color32(179, 128, 000, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
-                EndCustomInspectorBackground();
+                InspectorExtensions.BeginCustomInspectorBackground(new Color32(179, 128, 000, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
+                InspectorExtensions.EndCustomInspectorBackground();
             }
             else
             {
-                BeginCustomInspectorBackground(new Color32(028, 128, 028, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
-                EndCustomInspectorBackground();
+                InspectorExtensions.BeginCustomInspectorBackground(new Color32(028, 128, 028, 255), paddingTop, paddingBottom, paddingLeft, paddingRight);
+                InspectorExtensions.EndCustomInspectorBackground();
             }
         }
 
@@ -279,27 +279,6 @@ namespace Gaskellgames.EditorOnly
             // button style 2 (utilities)
             buttonStyle2.fontSize = 10;
             buttonStyle2.normal.textColor = InspectorExtensions.textDisabledColor;
-        }
-
-        private void BeginCustomInspectorBackground(Color32 backgroundColor, float paddingTop = -4, float paddingBottom = -15, float paddingLeft = -18, float paddingRight = -4)
-        {
-            // cache variables
-            Rect screenRect = GUILayoutUtility.GetRect(1, 1);
-            Rect verticalRect = EditorGUILayout.BeginVertical();
-            
-            // calculate rect size
-            float xMin = screenRect.x + paddingLeft;
-            float yMin = screenRect.y + paddingTop;
-            float width = screenRect.width - (paddingLeft + paddingRight);
-            float height = verticalRect.height - (paddingTop + paddingBottom);
-            
-            // draw background rect
-            EditorGUI.DrawRect(new Rect(xMin, yMin, width, height), backgroundColor);
-        }
-
-        private void EndCustomInspectorBackground()
-        {
-            EditorGUILayout.EndVertical();
         }
 
         #endregion
