@@ -8,15 +8,16 @@ using UnityEditor;
 /// Code created by Gaskellgames: https://github.com/Gaskellgames/Unity_TransformUtilities
 /// </summary>
 
-namespace Gaskellgames.EditorHelper
+namespace Gaskellgames.EditorOnly
 {
     [CustomEditor(typeof(Transform)), CanEditMultipleObjects]
     public class TransformEditor : Editor
     {
         #region Serialized Properties & Variables
-        
+
+        private Type transformInspectorType;
         private Editor transformEditor;
-        List<Transform> transformTargets = new List<Transform>();
+        private List<Transform> transformTargets = new List<Transform>();
         private Rect[] repaintPositions = new Rect[4];
         private GUIStyle iconButtonStyle = new GUIStyle();
         private GUIStyle buttonStyle2 = new GUIStyle();
@@ -32,7 +33,10 @@ namespace Gaskellgames.EditorHelper
 
         private void OnEnable()
         {
+            transformInspectorType = typeof(EditorApplication).Assembly.GetType("UnityEditor.TransformInspector");
+            
             AssignTransformEditor();
+            AssignSelectedTargets();
         }
 
         private void OnDisable()
@@ -48,6 +52,8 @@ namespace Gaskellgames.EditorHelper
 
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
+            
             GUI.changed = false;
             if (useDefaultInspector)
             {
@@ -55,14 +61,12 @@ namespace Gaskellgames.EditorHelper
             }
             else
             {
-                serializedObject.Update();
                 repaintPositions = new Rect[4];
                 CreateButtons();
                 
                 // draw inspector
-                AssignSelectedTargets();
-                OnInspectorGUI_WrappedTransform(transformTargets);
-                OnInspectorGUI_TransformUtilities(transformTargets);
+                OnInspectorGUI_WrappedTransform();
+                OnInspectorGUI_TransformUtilities();
             
                 // force update window (to have snappy hover on buttons) if mouse over buttons
                 foreach (var repaintPosition in repaintPositions)
@@ -72,13 +76,13 @@ namespace Gaskellgames.EditorHelper
                         Repaint();
                     }
                 }
-            
-                // apply reference changes
-                serializedObject.ApplyModifiedProperties();
             }
+            
+            // apply reference changes
+            serializedObject.ApplyModifiedProperties();
         }
 
-        private void OnInspectorGUI_WrappedTransform(List<Transform> transformTargets)
+        private void OnInspectorGUI_WrappedTransform()
         {
             GUILayout.BeginHorizontal();
             
@@ -100,7 +104,7 @@ namespace Gaskellgames.EditorHelper
                 }
                 if (names != "")
                 {
-                    AssignTransformEditor();
+                    //AssignTransformEditor();
                     Debug.Log($"Local position reset for '{names}'", this);
                 }
             }
@@ -117,7 +121,7 @@ namespace Gaskellgames.EditorHelper
                 }
                 if (names != "")
                 {
-                    AssignTransformEditor();
+                    //AssignTransformEditor();
                     Debug.Log($"Local position reset for '{names}'", this);
                 }
             }
@@ -134,7 +138,7 @@ namespace Gaskellgames.EditorHelper
                 }
                 if (names != "")
                 {
-                    AssignTransformEditor();
+                    //AssignTransformEditor();
                     Debug.Log($"Local position reset for '{names}'", this);
                 }
             }
@@ -144,7 +148,7 @@ namespace Gaskellgames.EditorHelper
             GUILayout.EndHorizontal();
         }
 
-        private void OnInspectorGUI_TransformUtilities(List<Transform> transformTargets)
+        private void OnInspectorGUI_TransformUtilities()
         {
             // get & update references
             Color defaultBackground = GUI.backgroundColor;
@@ -210,11 +214,7 @@ namespace Gaskellgames.EditorHelper
 
         private void AssignTransformEditor()
         {
-            DestroyImmediate(transformEditor);
-            
-            Transform thisTarget = (Transform)target;
-            Type type = typeof(EditorApplication).Assembly.GetType("UnityEditor.TransformInspector");
-            transformEditor = CreateEditorWithContext(targets, thisTarget, type);
+            transformEditor = CreateEditorWithContext(targets, target as Transform, transformInspectorType);
         }
 
         private void AssignSelectedTargets()
@@ -222,7 +222,7 @@ namespace Gaskellgames.EditorHelper
             transformTargets.Clear();
             foreach (var targetObject in targets)
             {
-                Transform transform = (Transform)targetObject;
+                Transform transform = targetObject as Transform;
                 if (!transformTargets.Contains(transform))
                 {
                     transformTargets.Add(transform);
