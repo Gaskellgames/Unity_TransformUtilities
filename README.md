@@ -1,8 +1,9 @@
 # Unity - Extended Transform Editor
 
 Extends the default Unity Transform inspector to include some useful functionality:
-- Reset buttons
-- View Global Position / Rotation / Scale as ReadOnly
+- Reset buttons.
+- View Global Position / Rotation / Scale as ReadOnly.
+- View Asset Labels on prefab objects in the hierarchy.
 
 <a href="https://imgur.com/cK6O3Ae.png"><img src="https://imgur.com/cK6O3Ae.png" title="source: imgur.com" /></a>
 
