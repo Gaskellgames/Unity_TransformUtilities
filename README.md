@@ -1,18 +1,22 @@
+# Unity Default Transform
+
+![Unity Default](Images/IMG_Default.png)
+
 # Unity - Extended Transform Editor
 
-Extends the default Unity Transform inspector to include some useful functionality:
+Extends the default Unity Transform inspector to include additional functionality:
 - Reset buttons.
+- Non-uniform scale warning.
 - View Global Position / Rotation / Scale as ReadOnly.
-- View Asset Labels on prefab objects in the hierarchy.
 
-<a href="https://imgur.com/cK6O3Ae.png"><img src="https://imgur.com/cK6O3Ae.png" title="source: imgur.com" /></a>
+![Uniform Scale](Images/IMG_UniformScale.png)
 
-<a href="https://imgur.com/09dZb7K.png"><img src="https://imgur.com/09dZb7K.png" title="source: imgur.com" /></a>
+![Uniform Scale Open](Images/IMG_UniformScale_Open.png)
 
-<a href="https://imgur.com/hlfXYY5.png"><img src="https://imgur.com/hlfXYY5.png" title="source: imgur.com" /></a>
+![Non Uniform Parent Scale](Images/IMG_NonUniformParentScale.png)
 
-<a href="https://imgur.com/ATbt8CZ.png"><img src="https://imgur.com/ATbt8CZ.png" title="source: imgur.com" /></a>
+![Non Uniform Parent Scale Open](Images/IMG_NonUniformParentScale_Open.png)
 
-<a href="https://imgur.com/EQ205IA.png"><img src="https://imgur.com/EQ205IA.png" title="source: imgur.com" /></a>
+![Non Uniform Scale](Images/IMG_NonUniformScale.png)
 
-<a href="https://imgur.com/nQ7Pwsf.png"><img src="https://imgur.com/nQ7Pwsf.png" title="source: imgur.com" /></a>
+![Non Uniform Scale Open](Images/IMG_NonUniformScale_Open.png)
